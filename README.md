@@ -1,3 +1,26 @@
+This is a fork of TRNPy that updates it to TRNSYS 18, fixes missing dependencies 
+by updating the install process to pip and finally it adds few features for 
+simulations that use custom files such as matlab (.m) or python (.py) files.
+
+Now to install the library you will need only a "pip install ." once you navigate 
+to the folder with the command prompt
+
+As an example, now you can add additional python and matlab files to your batch 
+folders just by adding an 'extra_file_patterns' argument to the DCK processor:
+
+_dck_proc = trnpy.core.DCK_processor(
+        extra_file_patterns=['\*.py', '\*.m']
+    )_
+
+Just be careful to not parallelize simulations when you have a matlab connection 
+(_mode_exec_parallel=False_ when calling trnpy.core.TRNExe).
+The matlab engine can work only with one simulation at a time.
+In a future update I will try to automatically disable parallelization when a
+.m file format is selected.
+
+I thank Joris Zimmermann Nettelstroth to have developed this library, which has 
+been very useful to build datasets.
+
 TRNpy: Parallelized TRNSYS simulation with Python
 =================================================
 Simulate TRNSYS deck files in serial or parallel and use parametric tables to
@@ -80,6 +103,8 @@ application folder anywhere. As explained, it makes sense to
 create shortcuts to the executable from your TRNSYS work folders.
 It can be compiled with `setup_exe.py`.
 
+**I did not review this .exe executable for this fork**
+
 Python
 ------
 If you want to use Python but do not yet have it installed, the easiest way to
@@ -94,6 +119,9 @@ every directory, which is very useful.
 With an existing Python environment, you can use `setup.py` to install
 TRNpy into the appropriate place in your Python environment. Then you can
 import it into your own Python scripts.
+
+**With this fork you just need the line "pip install ." once you have get to
+the folder with the cmd**
 
 
 Support
