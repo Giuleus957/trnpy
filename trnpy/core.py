@@ -1,4 +1,5 @@
 # Copyright (C) 2020 Joris Zimmermann
+# Updated by Giulio Tonellato in 2025 for TRNSYS 18 + some other few features
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -44,6 +45,7 @@ import itertools
 import datetime as dt
 import psutil
 import pandas as pd
+import glob
 
 # Default values that are used by multiple classes:
 regex_result_files_def = r'Result|\.sum|\.pr.|\.plt|\.out'  # result files
@@ -64,7 +66,7 @@ class TRNExe():
     """
 
     def __init__(self,
-                 path_TRNExe=r'C:\Trnsys17\Exe\TRNExe.exe',
+                 path_TRNExe=r'C:\TRNSYS18\Exe\TrnEXE64.exe',
                  mode_trnsys_hidden=False,
                  mode_exec_parallel=False,
                  n_cores=0,
@@ -719,10 +721,12 @@ class DCK_processor():
     new frequencies, e.g. from hours to months.
     """
 
-    def __init__(self, sim_folder=r'C:\Trnsys17\Work\batch',
-                 regex_result_files=regex_result_files_def):
+    def __init__(self, sim_folder=r'C:\TRNSYS18\Work\batch',
+                 regex_result_files=regex_result_files_def,
+                 extra_file_patterns=None):
         self.sim_folder = sim_folder
         self.regex_result_files = regex_result_files
+        self.extra_file_patterns = extra_file_patterns
 
     def parametric_table_auto(self, parametric_table, dck_file_list,
                               copy_files=True, disable_plotters=False):
@@ -1126,6 +1130,25 @@ class DCK_processor():
                 else:
                     logger.debug('%s: Copy source and destination are equal '
                                  'for file %s', dck.file_name, source_file)
+            
+            # copy files with user defined formats
+            if self.extra_file_patterns:
+                extra_files_to_copy = []
+                for pattern in self.extra_file_patterns:
+                    search_path = os.path.join(source_folder, pattern)
+                    found_files = glob.glob(search_path)
+                    if not found_files:
+                        logger.warning(f"No files found for pattern '{pattern}' in {source_folder}")
+                    extra_files_to_copy.extend(found_files)
+
+                if extra_files_to_copy:
+                    logger.debug(f"Copying extra files for {dck.file_name}: {[os.path.basename(f) for f in extra_files_to_copy]}")
+                    for file_path in extra_files_to_copy:
+                        try:
+                            # Use copy2 to preserve file metadata
+                            shutil.copy2(file_path, destination_folder)
+                        except Exception as e:
+                            logger.error(f"Could not copy extra file {file_path} to {destination_folder}: {e}")
 
             # For result files, we must create the folders
             for file in dck.result_files:
@@ -1823,7 +1846,7 @@ class SimStudio():
     """
 
     def __init__(self,
-                 path_Studio=r'C:\Trnsys17\Studio\Exe\Studio.exe',
+                 path_Studio=r'C:\TRNSYS18\Studio\Exe\Studio.exe',
                  ):
         """Initialize a Simulation Studio object.
 
